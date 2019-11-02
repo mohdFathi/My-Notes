@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
     
@@ -16,6 +17,9 @@ class TodoListViewController: UITableViewController {
     let datafilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     let defaultsKey = "ToDoListArray"
+    
+    
+    let context  = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,7 +32,7 @@ class TodoListViewController: UITableViewController {
         //            itemArray = items
         //        }
         
-        loadItemsFromPlist()
+        loadItems()
     }
     
     
@@ -53,10 +57,17 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(itemArray[indexPath.row])
         
+        
+       
+        
         let item = itemArray[indexPath.row]
+        
+        //context.delete(item)
+        //itemArray.remove(at: indexPath.row)
+        
         item.done = !item.done
         
-        self.saveItemsToPlist()
+        self.saveItems()
         
         
         tableView.deselectRow(at: indexPath, animated: true)
@@ -71,13 +82,14 @@ class TodoListViewController: UITableViewController {
             print("note is : \(textField.text!)")
             
             //TODO: prevent adding note if it is empty
-            let newItem = Item()
+            let newItem = Item(context: self.context)
             newItem.title = textField.text!
+            newItem.done = false
             self.itemArray.append(newItem)
             
             //self.defualts.set(self.itemArray, forKey: self.defaultsKey)//this line saves the array to user defaults
             
-            self.saveItemsToPlist()
+            self.saveItems()
         }
         
         alert.addTextField { (alertTextField) in
@@ -89,31 +101,52 @@ class TodoListViewController: UITableViewController {
     }
     
     
-    func saveItemsToPlist(){
-        
-        let encoder = PropertyListEncoder()
+    func saveItems(){
         do{
-            let data = try encoder.encode(self.itemArray)
-            try data.write(to: self.datafilePath!)
+           try context.save()
         }
         catch{
             print("error encoding item array, \(error)")
         }
-        
         self.tableView.reloadData() //because the daatasource have been changed by adding the new note to the array
     }
     
-    func loadItemsFromPlist(){
-        if let data = try? Data(contentsOf: datafilePath!) {
-            let decoder = PropertyListDecoder()
-            do{
-            itemArray = try decoder.decode([Item].self, from: data)
-            }catch {
-                print("error decoding item array , \(error)")
-            }
-            
+    func loadItems(with request : NSFetchRequest<Item> = Item.fetchRequest()){
+        do {
+            itemArray = try context.fetch(request)
         }
+        catch{
+            print("error fetching data \(error)")
+        }
+        tableView.reloadData()
     }
     
 }
 
+extension TodoListViewController :UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print(searchBar.text!)
+        
+        
+    }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0{
+            loadItems()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+        else {
+            
+            let request : NSFetchRequest<Item> = Item.fetchRequest()
+            
+            request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+            request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            loadItems(with: request)
+        }
+        
+    }
+}
