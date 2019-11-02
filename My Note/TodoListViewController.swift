@@ -11,10 +11,17 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     var itemArray = ["first " , "second" , "last"]
+    let defualts = UserDefaults.standard
+    
+    let defaultsKey = "ToDoListArray"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        if let items = UserDefaults.standard.array(forKey: defaultsKey) as? [String] {
+            itemArray = items
+        }
     }
     
     
@@ -56,8 +63,10 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Note", style: .default) { (action) in
             print("note is : \(textField.text!)")
             
-            //todo : prevent adding note if it is empty
+            //TODO: prevent adding note if it is empty
             self.itemArray.append(textField.text!)
+            
+            self.defualts.set(self.itemArray, forKey: self.defaultsKey)//this line saves the array to user defaults
             
             self.tableView.reloadData() //because the daatasource have been changed by adding the new note to the array
         }
