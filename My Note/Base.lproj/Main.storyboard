@@ -34,6 +34,12 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="My Notes" id="6kJ-XX-9Zd">
                         <barButtonItem key="backBarButtonItem" title="back" id="BI6-6C-pcA"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="CC2-Ub-kF8">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="addItemButtonPressed:" destination="5H5-W5-bRQ" id="GF7-AI-mP0"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="yp4-mJ-uJ3" userLabel="First Responder" sceneMemberID="firstResponder"/>

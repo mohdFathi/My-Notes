@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    let itemArray = ["first " , "second" , "last"]
+    var itemArray = ["first " , "second" , "last"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,6 +48,27 @@ class TodoListViewController: UITableViewController {
     
     
 
-
+    @IBAction func addItemButtonPressed(_ sender: UIBarButtonItem) {
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Note", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Note", style: .default) { (action) in
+            print("note is : \(textField.text!)")
+            
+            //todo : prevent adding note if it is empty
+            self.itemArray.append(textField.text!)
+            
+            self.tableView.reloadData() //because the daatasource have been changed by adding the new note to the array
+        }
+        
+        alert.addTextField { (alertTextField) in
+            textField = alertTextField
+        }
+        
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
 
